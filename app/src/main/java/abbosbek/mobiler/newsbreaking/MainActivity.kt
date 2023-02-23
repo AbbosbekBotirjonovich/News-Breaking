@@ -8,7 +8,12 @@ import android.os.Looper
 import android.view.View
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
-
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     private lateinit var binding : ActivityMainBinding
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -16,11 +21,11 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(R.layout.fragment_splash)
 
-        Handler(Looper.myLooper()!!).postDelayed({
+        CoroutineScope(Dispatchers.Main).launch {
+            delay(3000)
             setContentView(binding.root)
             binding.bottomNav.setupWithNavController(findNavController(R.id.nav_host_fragment))
-        },3000)
-
+        }
     }
 
 }
