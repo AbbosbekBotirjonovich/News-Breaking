@@ -30,9 +30,6 @@ class SplashFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.tvTitle.postDelayed({
-            (activity as MainActivity).showBottomBar()
-        },3000)
     }
 
     override fun onDestroyView() {
