@@ -1,4 +1,4 @@
-package abbosbek.mobiler.newsbreaking.viewModel
+package abbosbek.mobiler.newsbreaking.ui.main
 
 import abbosbek.mobiler.newsbreaking.models.NewsResponse
 import abbosbek.mobiler.newsbreaking.repository.NewsRepository
