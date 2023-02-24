@@ -1,9 +1,8 @@
 package abbosbek.mobiler.newsbreaking.viewModel
 
 import abbosbek.mobiler.newsbreaking.models.NewsResponse
-import abbosbek.mobiler.newsbreaking.repository.TestRepo
-import android.util.Log
-import androidx.lifecycle.LiveData
+import abbosbek.mobiler.newsbreaking.repository.NewsRepository
+import abbosbek.mobiler.newsbreaking.utils.Resource
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -13,24 +12,29 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel
-@Inject constructor(private val repo: TestRepo) : ViewModel(){
+@Inject constructor(private val repository: NewsRepository) : ViewModel(){
+
+    val newsLiveData : MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
+
+    var numberPage = 1
 
     init {
-        getAll()
+        getNews("ru")
     }
 
-    private val _all = MutableLiveData<NewsResponse>()
+    private fun getNews(countryCode : String) =
+        viewModelScope.launch {
+            newsLiveData.postValue(Resource.Loading())
+            val response = repository.getNews(countryCode = countryCode, pageNumber = numberPage)
+            if (response.isSuccessful){
 
-    val all : LiveData<NewsResponse> get() = _all
+                response.body().let { res->
+                    newsLiveData.postValue(Resource.Success(res))
+                }
 
-    fun getAll() = viewModelScope.launch {
-        repo.getAll().let {
-            if (it.isSuccessful){
-                _all.postValue(it.body())
             }else{
-                Log.d("checkData", "getAll: ${it.errorBody()}")
+                newsLiveData.postValue(Resource.Error(message = response.message()))
             }
         }
-    }
 
 }

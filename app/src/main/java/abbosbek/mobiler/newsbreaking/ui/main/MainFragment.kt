@@ -6,11 +6,17 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import abbosbek.mobiler.newsbreaking.R
+import abbosbek.mobiler.newsbreaking.adapter.NewsAdapter
 import abbosbek.mobiler.newsbreaking.databinding.FragmentDetailsBinding
 import abbosbek.mobiler.newsbreaking.databinding.FragmentMainBinding
+import abbosbek.mobiler.newsbreaking.utils.Resource
 import abbosbek.mobiler.newsbreaking.viewModel.MainViewModel
+import android.util.Log
+import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.RecyclerView
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -20,6 +26,7 @@ class MainFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel by viewModels<MainViewModel>()
+    lateinit var newsAdapter: NewsAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -32,7 +39,40 @@ class MainFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.all
+        initAdapter()
+
+        viewModel.newsLiveData.observe(viewLifecycleOwner){response->
+            when(response){
+
+                is Resource.Success -> {
+                    binding.progressBar.isVisible = false
+                    response.data?.let {
+                        newsAdapter.differ.submitList(it.articles)
+                    }
+                }
+                is Resource.Error ->{
+                    binding.progressBar.isVisible = false
+                    response.data?.let {
+                        Log.e("CheckData", "onViewCreated: Error ${it}", )
+                    }
+                }
+                is Resource.Loading ->{
+                    binding.progressBar.isVisible = true
+                }
+
+            }
+        }
+
+    }
+
+    private fun initAdapter() = with(binding) {
+
+        newsAdapter = NewsAdapter()
+
+        val itemDecoration = DividerItemDecoration(requireContext(),RecyclerView.VERTICAL)
+
+        recyclerNews.adapter = newsAdapter
+        recyclerNews.addItemDecoration(itemDecoration)
     }
 
     override fun onDestroyView() {
