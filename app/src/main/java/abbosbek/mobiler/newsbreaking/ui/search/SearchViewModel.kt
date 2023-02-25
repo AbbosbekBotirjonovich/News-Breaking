@@ -20,6 +20,8 @@ class SearchViewModel
 
     var searchPage = 1
 
+    var searchNewsResponse : NewsResponse ?= null
+
     init {
         getSearchNews("")
     }
@@ -31,7 +33,15 @@ class SearchViewModel
 
             if (response.isSuccessful){
                 response.body().let {newsResponse ->
-                    searchNewsLiveData.postValue(Resource.Success(newsResponse))
+                    searchPage++
+                    if (searchNewsResponse == null){
+                        searchNewsResponse = newsResponse
+                    }else{
+                        val oldArticles = searchNewsResponse?.articles
+                        val newArticles = newsResponse!!.articles
+                        oldArticles?.addAll(newArticles)
+                    }
+                    searchNewsLiveData.postValue(Resource.Success(searchNewsResponse ?: newsResponse))
                 }
             }else{
                 searchNewsLiveData.postValue(Resource.Error(response.message()))

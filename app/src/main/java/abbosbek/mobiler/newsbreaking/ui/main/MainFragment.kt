@@ -9,13 +9,17 @@ import android.view.View
 import android.view.ViewGroup
 import abbosbek.mobiler.newsbreaking.adapter.NewsAdapter
 import abbosbek.mobiler.newsbreaking.databinding.FragmentMainBinding
+import abbosbek.mobiler.newsbreaking.utils.Constants.QUERY_PAGE_SIZE
 import abbosbek.mobiler.newsbreaking.utils.Resource
 import android.util.Log
+import android.widget.AbsListView
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
+import androidx.core.view.setPadding
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -52,18 +56,23 @@ class MainFragment : Fragment() {
 
                 is Resource.Success -> {
                     binding.progressBar.isVisible = false
+                    isLoading = false
                     response.data?.let {
-                        newsAdapter.differ.submitList(it.articles)
+                        newsAdapter.differ.submitList(it.articles.toList())
+                        val totalPages = it.totalResults / QUERY_PAGE_SIZE + 2
+                        isLastPage = viewModel.numberPage == totalPages
                     }
                 }
                 is Resource.Error ->{
                     binding.progressBar.isVisible = false
+                    isLoading = false
                     response.data?.let {
                         Log.e("CheckData", "onViewCreated: Error ${it}", )
                     }
                 }
                 is Resource.Loading ->{
                     binding.progressBar.isVisible = true
+                    isLoading = true
                 }
 
             }
@@ -79,10 +88,49 @@ class MainFragment : Fragment() {
 
         recyclerNews.adapter = newsAdapter
         recyclerNews.addItemDecoration(itemDecoration)
+        binding.recyclerNews.addOnScrollListener(this@MainFragment.scrollListener)
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding == null
     }
+
+
+    var isLoading = false
+    var isLastPage = false
+    var isScrolling = false
+
+    val scrollListener = object : RecyclerView.OnScrollListener(){
+        override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+            super.onScrollStateChanged(recyclerView, newState)
+            if (newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL){
+                isScrolling = true
+            }
+        }
+
+        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+            super.onScrolled(recyclerView, dx, dy)
+            val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+            val firstVisibleItemPosition  = layoutManager.findFirstVisibleItemPosition()
+
+            val visibleItemCount = layoutManager.childCount
+            val totalItemCount = layoutManager.itemCount
+
+            val isNotLoadingAndNoteLastPage = !isLoading && !isLastPage
+            val isAtLastItem = firstVisibleItemPosition + visibleItemCount >= totalItemCount
+            val isNotAtBeginning = firstVisibleItemPosition >= 0
+            val isTotalMoreThanVisible = totalItemCount >= QUERY_PAGE_SIZE
+
+            val shouldPaginate = isNotLoadingAndNoteLastPage && isAtLastItem && isNotAtBeginning && isTotalMoreThanVisible && isScrolling
+
+            if (shouldPaginate){
+                viewModel.getNews("us")
+                isScrolling = false
+            }else{
+                binding.recyclerNews.setPadding(0,0,0,0)
+            }
+        }
+    }
+
 }

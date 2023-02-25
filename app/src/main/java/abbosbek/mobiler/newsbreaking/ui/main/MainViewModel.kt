@@ -18,18 +18,27 @@ class MainViewModel
 
     var numberPage = 1
 
+    var breakingNewsResponse : NewsResponse ?= null
+
     init {
-        getNews("ru")
+        getNews("us")
     }
 
-    private fun getNews(countryCode : String) =
+    fun getNews(countryCode : String) =
         viewModelScope.launch {
             newsLiveData.postValue(Resource.Loading())
-            val response = repository.getNews(countryCode = countryCode, pageNumber = numberPage)
+            val response = repository.getSearchNews(query = countryCode, pageNumber = numberPage)
             if (response.isSuccessful){
-
                 response.body().let { res->
-                    newsLiveData.postValue(Resource.Success(res))
+                    numberPage++
+                    if (breakingNewsResponse == null){
+                        breakingNewsResponse = res
+                    }else{
+                        val oldArticles = breakingNewsResponse?.articles
+                        val newArticles = res!!.articles
+                        oldArticles?.addAll(newArticles)
+                    }
+                    newsLiveData.postValue(Resource.Success(breakingNewsResponse ?: res))
                 }
 
             }else{

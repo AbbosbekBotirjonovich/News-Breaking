@@ -12,6 +12,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.webkit.URLUtil
+import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
@@ -26,8 +27,9 @@ class DetailsFragment : Fragment() {
     private var _binding : FragmentDetailsBinding ?= null
     private val binding get() = _binding!!
 
-    private val bundleArgs : DetailsFragmentArgs by navArgs()
     private val viewModel by viewModels<DetailViewModel>()
+
+    val args : DetailsFragmentArgs by navArgs()
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -44,41 +46,15 @@ class DetailsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val articleArgs = bundleArgs.article
+        val article = args.article
 
-        articleArgs.let { article ->
-            article.urlToImage.let {
-                Glide.with(this).load(article.urlToImage).into(binding.headerImage)
-            }
-            binding.headerImage.clipToOutline = true
-            binding.articleDetailsTitle.text = article.title
-            binding.tvDescriptionTitle.text = article.description
-
-            binding.detailsButton.setOnClickListener {
-                try {
-                    Intent()
-                        .setAction(Intent.ACTION_VIEW)
-                        .addCategory(Intent.CATEGORY_BROWSABLE)
-                        .setData(Uri.parse(takeIf {URLUtil.isValidUrl(article.url)}
-                            ?.let {
-                                article.url
-                            } ?: "https://google.com"
-                        ))
-                        .let {
-                            ContextCompat.startActivity(requireContext(),it,null)
-                        }
-                }catch (e : Exception){
-                    Toast.makeText(
-                        requireActivity(),
-                        "The device doesn't have any browser to view the document!",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            }
+        binding.webView.apply {
+            webViewClient = WebViewClient()
+            article.url?.let { loadUrl(it) }
         }
 
-        binding.iconFavorite.setOnClickListener{
-            viewModel.saveFavoriteArticle(articleArgs)
+        binding.fab.setOnClickListener{
+            viewModel.saveFavoriteArticle(article)
             Snackbar.make(view,"Article saved successfully",Snackbar.LENGTH_SHORT).show()
         }
     }
