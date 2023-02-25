@@ -14,15 +14,20 @@ import android.net.Uri
 import android.webkit.URLUtil
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
 import com.bumptech.glide.Glide
+import com.google.android.material.snackbar.Snackbar
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class DetailsFragment : Fragment() {
 
     private var _binding : FragmentDetailsBinding ?= null
     private val binding get() = _binding!!
 
     private val bundleArgs : DetailsFragmentArgs by navArgs()
+    private val viewModel by viewModels<DetailViewModel>()
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -72,6 +77,10 @@ class DetailsFragment : Fragment() {
             }
         }
 
+        binding.iconFavorite.setOnClickListener{
+            viewModel.saveFavoriteArticle(articleArgs)
+            Snackbar.make(view,"Article saved successfully",Snackbar.LENGTH_SHORT).show()
+        }
     }
 
     override fun onDestroyView() {
