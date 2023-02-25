@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.View
+import androidx.core.view.isVisible
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
 import dagger.hilt.android.AndroidEntryPoint
@@ -26,6 +27,13 @@ class MainActivity : AppCompatActivity() {
             setContentView(binding.root)
             binding.bottomNav.setupWithNavController(findNavController(R.id.nav_host_fragment))
         }
+    }
+
+    fun hideBottomNav(){
+        binding.bottomNav.isVisible = false
+    }
+    fun showBottomNav(){
+        binding.bottomNav.isVisible = true
     }
 
 }

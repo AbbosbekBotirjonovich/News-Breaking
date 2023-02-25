@@ -1,5 +1,7 @@
 package abbosbek.mobiler.newsbreaking.ui.main
 
+import abbosbek.mobiler.newsbreaking.MainActivity
+import abbosbek.mobiler.newsbreaking.R
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -9,8 +11,10 @@ import abbosbek.mobiler.newsbreaking.adapter.NewsAdapter
 import abbosbek.mobiler.newsbreaking.databinding.FragmentMainBinding
 import abbosbek.mobiler.newsbreaking.utils.Resource
 import android.util.Log
+import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import dagger.hilt.android.AndroidEntryPoint
@@ -34,8 +38,14 @@ class MainFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         initAdapter()
+        newsAdapter.setOnItemClickListener {
+            val bundle = bundleOf("article" to it)
+            findNavController().navigate(
+                R.id.action_mainFragment_to_detailsFragment,
+                bundle
+            )
+        }
 
         viewModel.newsLiveData.observe(viewLifecycleOwner){response->
             when(response){

@@ -13,7 +13,15 @@ import com.bumptech.glide.Glide
 
 class NewsAdapter : RecyclerView.Adapter<NewsAdapter.ItemHolder>() {
 
-    inner class ItemHolder(val binding : NewsItemLayoutBinding) : RecyclerView.ViewHolder(binding.root)
+    inner class ItemHolder(val binding : NewsItemLayoutBinding) : RecyclerView.ViewHolder(binding.root){
+
+        init {
+            binding.root.setOnClickListener {
+                onItemClickListener?.invoke(differ.currentList[adapterPosition])
+            }
+        }
+
+    }
 
     private val diffUtil =object : DiffUtil.ItemCallback<Article>(){
         override fun areItemsTheSame(oldItem: Article, newItem: Article): Boolean {
@@ -50,6 +58,7 @@ class NewsAdapter : RecyclerView.Adapter<NewsAdapter.ItemHolder>() {
             articleTitle.text = article.title
             articleData.text = article.publishedAt
         }
+
     }
 
     private var onItemClickListener : ((Article) -> Unit) ?= null

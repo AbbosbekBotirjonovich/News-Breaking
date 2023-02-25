@@ -9,7 +9,11 @@
         android:id="@+id/detailsFragment"
         android:name="abbosbek.mobiler.newsbreaking.ui.detail.DetailsFragment"
         android:label="fragment_details"
-        tools:layout="@layout/fragment_details" />
+        tools:layout="@layout/fragment_details" >
+        <argument
+            android:name="article"
+            app:argType="abbosbek.mobiler.newsbreaking.models.Article" />
+    </fragment>
     <fragment
         android:id="@+id/favoriteFragment"
         android:name="abbosbek.mobiler.newsbreaking.ui.favorite.FavoriteFragment"
